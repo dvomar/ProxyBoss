@@ -25,7 +25,7 @@ namespace ProxyBoss
             MainWindow = window;
 
             _notifyIcon = new NotifyIcon();
-            _notifyIcon.Click += (s, args) => ShowMainWindow();
+            _notifyIcon.MouseClick += ShowMainWindow;
             _notifyIcon.Visible = true;
 
             _proxySwitcher = new ProxySwitcher();
@@ -51,7 +51,7 @@ namespace ProxyBoss
 
             _notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
 
-            _notifyIcon.ContextMenuStrip.Items.Add("Open ProxyBoss").Click += (s, e) => ShowMainWindow();
+            _notifyIcon.ContextMenuStrip.Items.Add("Open ProxyBoss").Click += ShowMainWindow;
             _notifyIcon.ContextMenuStrip.Items.Add("Exit").Click += (s, e) => ExitApplication();
         }
 
@@ -88,8 +88,12 @@ namespace ProxyBoss
             _notifyIcon = null;
         }
 
-        private void ShowMainWindow()
+        private void ShowMainWindow(object sender, EventArgs eventArgs)
         {
+            if (eventArgs is MouseEventArgs mouseEventArgs)
+                if (mouseEventArgs.Button != MouseButtons.Left)
+                    return;
+
             if (MainWindow.IsVisible)
             {
                 if (MainWindow.WindowState == WindowState.Minimized)
