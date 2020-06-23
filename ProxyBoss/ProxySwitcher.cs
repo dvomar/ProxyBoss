@@ -12,37 +12,46 @@ namespace ProxyBoss
         public const int INTERNET_OPTION_SETTINGS_CHANGED = 39;
         public const int INTERNET_OPTION_REFRESH = 37;
 
-        public void Switch()
+        public ProxyState Switch()
         {
             RegistryKey registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
 
-            if (registry == null)
-                return;
+            ProxyState result = GetRegistryState(registry);
 
-            if ((int)registry.GetValue("ProxyEnable", 0) == 0)
+            if (result == ProxyState.Disabled)
                 Enable(registry);
-            else if ((int)registry.GetValue("ProxyEnable", 1) == 1)
+            else if (result == ProxyState.Enabled)
                 Disable(registry);
 
-            registry.Close();
+            registry?.Close();
 
             bool settingsReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
             bool refreshReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
+
+            return result;
         }
 
         public ProxyState GetState()
         {
-            ProxyState result = ProxyState.Disabled;
             RegistryKey registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", false);
 
-            if ((int)registry.GetValue("ProxyEnable", 0) == 0)
-                result = ProxyState.Disabled;
-            else if ((int)registry.GetValue("ProxyEnable", 1) == 1)
-                result = ProxyState.Enabled;
+            ProxyState result = GetRegistryState(registry);
 
-            registry.Close();
+            registry?.Close();
 
             return result;
+        }
+
+        private ProxyState GetRegistryState(RegistryKey registry)
+        {
+            if (registry == null)
+                return ProxyState.Disabled;
+            if ((int)registry.GetValue("ProxyEnable", 0) == 0)
+                return ProxyState.Disabled;
+            if ((int)registry.GetValue("ProxyEnable", 1) == 1)
+                return ProxyState.Enabled;
+
+            return ProxyState.Disabled;
         }
 
         private void Enable(RegistryKey registry)

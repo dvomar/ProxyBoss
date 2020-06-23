@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Forms;
 using Application = System.Windows.Application;
+using Timer = System.Threading.Timer;
 
 namespace ProxyBoss
 {
@@ -14,6 +16,8 @@ namespace ProxyBoss
         private NotifyIcon _notifyIcon;
         private bool _isExit;
         private ProxySwitcher _proxySwitcher;
+        private Timer _timer;
+        private Stopwatch _stopwatch;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -62,7 +66,26 @@ namespace ProxyBoss
             var window = MainWindow as MainWindow;
             window.SetProxyViewSource();
 
+            _stopwatch.Restart();
             ChangeContextMenuStripItemsByProxyState();
+        }
+
+        private void CreateTimer()
+        {
+            _timer = new Timer(Callback, "Temporarily checking proxy state", TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            _stopwatch = new Stopwatch();
+            _stopwatch.Start();
+        }
+
+        private void Callback(object state)
+        {
+            ChangeContextMenuStripItemsByProxyState();
+            
+            if (_stopwatch.IsRunning && _stopwatch.Elapsed >= TimeSpan.FromMinutes(2))
+            {
+                _timer.Dispose();
+                _stopwatch.Stop();
+            }
         }
 
         private void ChangeContextMenuStripItemsByProxyState()
@@ -78,6 +101,9 @@ namespace ProxyBoss
                 _notifyIcon.ContextMenuStrip.Items[0].Text = "Disable proxy";
                 _notifyIcon.Icon = ProxyBoss.Properties.Resources.AppIconEnabled;
             }
+
+            if (_timer == null)
+                CreateTimer();
         }
 
         private void ExitApplication()
