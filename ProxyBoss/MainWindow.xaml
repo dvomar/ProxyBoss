@@ -1,0 +1,43 @@
+﻿<mah:MetroWindow x:Class="ProxyBoss.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                 xmlns:local="clr-namespace:ProxyBoss"
+                 xmlns:commands="clr-namespace:ProxyBoss.Commands"
+                 mc:Ignorable="d"
+                 Title="ProxyBoss" Height="110" Width="170" Topmost="True">
+    <Window.Resources>
+        <CollectionViewSource x:Key="ProxyViewSource" />
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{x:Static commands:CloseThisWindowCommand.Instance}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" />
+    </Window.InputBindings>
+    <Grid DataContext="{StaticResource ProxyViewSource}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0"
+                   Text="{Binding Path=Text, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                   Foreground="{Binding Path=TextColor, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                   VerticalAlignment="Center" HorizontalAlignment="Center" />
+        <Button Grid.Row="1"
+                Content="{Binding Path=ButtonText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                Foreground="{Binding Path=ButtonTextColor, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                Height="20"
+                Margin="10,0"
+                Click="SwitchProxyButton_OnClick" />
+        <Button Grid.Row="2"
+                Content="Refresh"
+                Height="20"
+                Margin="10,0,10,10"
+                Click="RefreshButton_OnClick" />
+    </Grid>
+</mah:MetroWindow>
