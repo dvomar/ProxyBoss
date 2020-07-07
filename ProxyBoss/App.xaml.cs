@@ -83,7 +83,8 @@ namespace ProxyBoss
             
             if (_stopwatch.IsRunning && _stopwatch.Elapsed >= TimeSpan.FromMinutes(2))
             {
-                _timer.Dispose();
+                _timer?.Dispose();
+                _timer = null;
                 _stopwatch.Stop();
             }
         }
