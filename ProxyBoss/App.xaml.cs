@@ -72,7 +72,7 @@ namespace ProxyBoss
 
         private void CreateTimer()
         {
-            _timer = new Timer(Callback, "Temporarily checking proxy state", TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            _timer = new Timer(Callback, "Temporarily checking proxy state", TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2));
             _stopwatch = new Stopwatch();
             _stopwatch.Start();
         }
@@ -81,7 +81,7 @@ namespace ProxyBoss
         {
             ChangeContextMenuStripItemsByProxyState();
             
-            if (_stopwatch.IsRunning && _stopwatch.Elapsed >= TimeSpan.FromMinutes(2))
+            if (_stopwatch.IsRunning && _stopwatch.Elapsed >= TimeSpan.FromMinutes(10))
             {
                 _timer?.Dispose();
                 _timer = null;
