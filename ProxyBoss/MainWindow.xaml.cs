@@ -16,14 +16,14 @@ namespace ProxyBoss
         private readonly ButtonContent _buttonContent = new ButtonContent();
 
         public event EventHandler SwitchRefresh;
-        
-        public MainWindow()
+
+        public MainWindow(ProxySwitcher switcher)
         {
             InitializeComponent();
 
             ThemeManager.Current.ChangeTheme(this, "Dark.Blue");
 
-            _proxySwitcher = new ProxySwitcher();
+            _proxySwitcher = switcher;
 
             var proxyViewSource = (CollectionViewSource)FindResource("ProxyViewSource");
             proxyViewSource.Source = new object[] { _buttonContent };
@@ -55,7 +55,7 @@ namespace ProxyBoss
 
         private void SwitchProxyButton_OnClick(object sender, RoutedEventArgs e)
         {
-            _proxySwitcher.Switch();
+            _proxySwitcher.Switch(_proxySwitcher.ReverseProxyState);
 
             SetProxyViewSource();
 

@@ -6,6 +6,7 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\AppIcon.ico</ApplicationIcon>
+    <Version>1.2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

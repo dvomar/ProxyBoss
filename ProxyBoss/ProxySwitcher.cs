@@ -12,23 +12,52 @@ namespace ProxyBoss
         public const int INTERNET_OPTION_SETTINGS_CHANGED = 39;
         public const int INTERNET_OPTION_REFRESH = 37;
 
-        public ProxyState Switch()
+        private ProxyState _proxyState;
+        public ProxyState RequiredProxyState => _proxyState;
+
+        public ProxyState ReverseProxyState
+        {
+            get
+            {
+                switch (RequiredProxyState)
+                {
+                    case ProxyState.Disabled:
+                        return ProxyState.Enabled;
+                    case ProxyState.Enabled:
+                        return ProxyState.Disabled;
+                    default:
+                        return ProxyState.Enabled;
+                }
+            }
+        }
+
+        public ProxySwitcher()
+        {
+            _proxyState = GetState();
+        }
+
+        public void Switch(ProxyState state)
         {
             RegistryKey registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
 
-            ProxyState result = GetRegistryState(registry);
+            //ProxyState result = GetRegistryState(registry);
 
-            if (result == ProxyState.Disabled)
-                Enable(registry);
-            else if (result == ProxyState.Enabled)
-                Disable(registry);
+            switch (state)
+            {
+                case ProxyState.Disabled:
+                    Disable(registry);
+                    break;
+                case ProxyState.Enabled:
+                    Enable(registry);
+                    break;
+            }
 
             registry?.Close();
 
             bool settingsReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
             bool refreshReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
 
-            return result;
+            _proxyState = ReverseProxyState;
         }
 
         public ProxyState GetState()

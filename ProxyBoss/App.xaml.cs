@@ -18,21 +18,22 @@ namespace ProxyBoss
         private ProxySwitcher _proxySwitcher;
         private Timer _timer;
         private Stopwatch _stopwatch;
-
+        
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            var window = new MainWindow();
+
+            _proxySwitcher = new ProxySwitcher();
+
+            var window = new MainWindow(_proxySwitcher);
             window.Closing += MainWindow_Closing;
             window.Deactivated += MainWindowOnDeactivated;
             window.SwitchRefresh += WindowOnSwitchRefresh;
             MainWindow = window;
-
+            
             _notifyIcon = new NotifyIcon();
             _notifyIcon.MouseClick += ShowMainWindow;
             _notifyIcon.Visible = true;
-
-            _proxySwitcher = new ProxySwitcher();
             
             CreateContextMenu();
             ChangeContextMenuStripItemsByProxyState();
@@ -46,11 +47,10 @@ namespace ProxyBoss
         private void CreateContextMenu()
         {
             _notifyIcon.ContextMenuStrip = new ContextMenuStrip();
-
-            ProxyState state = _proxySwitcher.GetState();
-            if (state == ProxyState.Disabled)
+            
+            if (_proxySwitcher.RequiredProxyState == ProxyState.Disabled)
                 _notifyIcon.ContextMenuStrip.Items.Add("Enable proxy").Click += (s, e) => SwitchProxy();
-            else if (state == ProxyState.Enabled)
+            else if (_proxySwitcher.RequiredProxyState == ProxyState.Enabled)
                 _notifyIcon.ContextMenuStrip.Items.Add("Disable proxy").Click += (s, e) => SwitchProxy();
 
             _notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
@@ -61,7 +61,7 @@ namespace ProxyBoss
 
         private void SwitchProxy()
         {
-            _proxySwitcher.Switch();
+            _proxySwitcher.Switch(_proxySwitcher.ReverseProxyState);
 
             var window = MainWindow as MainWindow;
             window.SetProxyViewSource();
@@ -79,9 +79,14 @@ namespace ProxyBoss
 
         private void Callback(object state)
         {
-            ChangeContextMenuStripItemsByProxyState();
+            ProxyState proxyState = ChangeContextMenuStripItemsByProxyState();
+            if (proxyState != _proxySwitcher.RequiredProxyState)
+            {
+                _proxySwitcher.Switch(_proxySwitcher.RequiredProxyState);
+                ChangeContextMenuStripItemsByProxyState();
+            }
             
-            if (_stopwatch.IsRunning && _stopwatch.Elapsed >= TimeSpan.FromMinutes(10))
+            if (_stopwatch.IsRunning && _stopwatch.Elapsed >= TimeSpan.FromMinutes(1))
             {
                 _timer?.Dispose();
                 _timer = null;
@@ -89,7 +94,7 @@ namespace ProxyBoss
             }
         }
 
-        private void ChangeContextMenuStripItemsByProxyState()
+        private ProxyState ChangeContextMenuStripItemsByProxyState()
         {
             ProxyState state = _proxySwitcher.GetState();
             if (state == ProxyState.Disabled)
@@ -105,6 +110,8 @@ namespace ProxyBoss
 
             if (_timer == null)
                 CreateTimer();
+
+            return state;
         }
 
         private void ExitApplication()
