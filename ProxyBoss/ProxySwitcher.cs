@@ -19,7 +19,7 @@ namespace ProxyBoss
         {
             get
             {
-                switch (RequiredProxyState)
+                switch (_proxyState)
                 {
                     case ProxyState.Disabled:
                         return ProxyState.Enabled;
