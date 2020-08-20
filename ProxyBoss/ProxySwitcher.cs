@@ -57,7 +57,7 @@ namespace ProxyBoss
             bool settingsReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
             bool refreshReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
 
-            _proxyState = ReverseProxyState;
+            _proxyState = state;
         }
 
         public ProxyState GetState()
